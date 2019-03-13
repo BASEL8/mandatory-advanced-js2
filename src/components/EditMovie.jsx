@@ -8,6 +8,21 @@ class EditMovie extends Component {
     description: "",
     rating: 0
   };
+  componentWillMount() {
+    fetch(
+      "http://ec2-13-53-132-57.eu-north-1.compute.amazonaws.com:3000/movies/" +
+        this.props.match.params.id
+    )
+      .then((response) => response.json())
+      .then((movie) =>
+        this.setState({
+          title: movie.title,
+          description: movie.description,
+          director: movie.director,
+          rating: movie.rating
+        })
+      );
+  }
   handleAddMovie = (e) => {
     e.preventDefault();
     let movieInfo = {};
@@ -56,12 +71,7 @@ class EditMovie extends Component {
               className="form-control"
               id="movieTitleEdit"
               placeholder="title"
-              style={{
-                borderColor:
-                  this.state.title !== "" && this.state.title.length < 40
-                    ? "green"
-                    : "red"
-              }}
+              value={this.state.title}
             />
           </div>
           <div className="form-group">
@@ -72,26 +82,11 @@ class EditMovie extends Component {
               className="form-control"
               id="movieDirectorEdit"
               placeholder="Director"
-              style={{
-                borderColor:
-                  this.state.director !== "" && this.state.director.length < 40
-                    ? "green"
-                    : "red"
-              }}
+              value={this.state.director}
             />
           </div>
           <div className="form-group">
-            <label
-              htmlFor="movieRatingEdit"
-              style={{
-                color:
-                  this.state.rating >= 0 && this.state.rating <= 5
-                    ? "green"
-                    : "red"
-              }}
-            >
-              New Rating
-            </label>
+            <label htmlFor="movieRatingEdit">New Rating</label>
             <input
               onChange={(e) => this.setState({ rating: e.target.value })}
               type="range"
@@ -100,6 +95,7 @@ class EditMovie extends Component {
               className="form-control"
               id="movieRatingEdit"
               placeholder="Rating"
+              value={this.state.rating}
             />
           </div>
           <div className="form-group">
@@ -111,16 +107,11 @@ class EditMovie extends Component {
               className="form-control"
               id="movieDescriptionEdit"
               placeholder="Description"
-              style={{
-                borderColor:
-                  this.state.description !== "" && this.state.title.length < 300
-                    ? "green"
-                    : "red"
-              }}
+              value={this.state.description}
             />
           </div>
           <button type="submit" className="btn btn-primary">
-            Add
+            Edit
           </button>
         </form>
         {this.state.error ? (

@@ -21,7 +21,6 @@ class HomePage extends Component {
           id
       )
       .then((response) => {
-        console.log(response);
         const newState = [...this.state.movies];
         this.setState({
           movies: newState.filter((movie) => id !== movie.id)

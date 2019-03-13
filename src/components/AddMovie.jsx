@@ -28,11 +28,9 @@ class AddMovie extends Component {
       }
     )
       .then((response) => {
-        console.log();
         if (response.ok) {
           this.props.history.push("/Home");
         } else {
-          console.log("nop");
           this.setState({ error: true });
         }
       })
@@ -92,10 +90,7 @@ class AddMovie extends Component {
               Rating
             </label>
             <input
-              onChange={(e) => {
-                this.setState({ rating: e.target.value });
-                console.log(e.target.value);
-              }}
+              onChange={(e) => this.setState({ rating: e.target.value })}
               type="range"
               min="1"
               max="5"
