@@ -4,18 +4,15 @@ import { Helmet } from "react-helmet";
 class AddMovie extends Component {
   state = {
     error: false,
-    title: "",
-    director: "",
-    description: "",
-    rating: 0
+    info: {
+      title: "",
+      director: "",
+      description: "",
+      rating: 0
+    }
   };
   handleAddMovie = (e) => {
     e.preventDefault();
-    let movieInfo = {};
-    movieInfo.title = this.state.title;
-    movieInfo.description = this.state.description;
-    movieInfo.director = this.state.director;
-    movieInfo.rating = this.state.rating;
     fetch(
       "http://ec2-13-53-132-57.eu-north-1.compute.amazonaws.com:3000/movies",
       {
@@ -24,15 +21,13 @@ class AddMovie extends Component {
           Accept: "application/json",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(movieInfo)
+        body: JSON.stringify(this.state.info)
       }
     )
       .then((response) => {
-        console.log();
         if (response.ok) {
           this.props.history.push("/Home");
         } else {
-          console.log("nop");
           this.setState({ error: true });
         }
       })
@@ -40,7 +35,18 @@ class AddMovie extends Component {
         console.log(error);
       });
   };
+  handleChange = ({ currentTarget: input }) => {
+    const info = { ...this.state.info };
+    info[input.name] = input.value;
+    this.setState(
+      {
+        info
+      },
+      () => console.log(this.state.info)
+    );
+  };
   render() {
+    const { info, error } = this.state;
     return (
       <div className="flex-grow-1">
         <Helmet>
@@ -50,30 +56,30 @@ class AddMovie extends Component {
           <div className="form-group">
             <label htmlFor="movieTitle">Title</label>
             <input
-              onChange={(e) => this.setState({ title: e.target.value })}
+              onChange={this.handleChange}
               type="text"
               className="form-control"
               id="movieTitle"
               placeholder="title"
+              name="title"
               style={{
                 borderColor:
-                  this.state.title !== "" && this.state.title.length < 40
-                    ? "green"
-                    : "red"
+                  info.title !== "" && info.title.length < 40 ? "green" : "red"
               }}
             />
           </div>
           <div className="form-group">
             <label htmlFor="movieDirector">Director</label>
             <input
-              onChange={(e) => this.setState({ director: e.target.value })}
+              onChange={this.handleChange}
+              name="director"
               type="text"
               className="form-control"
               id="movieDirector"
               placeholder="Director"
               style={{
                 borderColor:
-                  this.state.director !== "" && this.state.director.length < 40
+                  info.director !== "" && info.director.length < 40
                     ? "green"
                     : "red"
               }}
@@ -83,19 +89,14 @@ class AddMovie extends Component {
             <label
               htmlFor="movieDRating"
               style={{
-                color:
-                  this.state.rating >= 0 && this.state.rating <= 5
-                    ? "green"
-                    : "red"
+                color: info.rating >= 0 && info.rating <= 5 ? "green" : "red"
               }}
             >
               Rating
             </label>
             <input
-              onChange={(e) => {
-                this.setState({ rating: e.target.value });
-                console.log(e.target.value);
-              }}
+              onChange={this.handleChange}
+              name="rating"
               type="range"
               min="1"
               max="5"
@@ -107,7 +108,8 @@ class AddMovie extends Component {
           <div className="form-group">
             <label htmlFor="movieDescription">Description</label>
             <textarea
-              onChange={(e) => this.setState({ description: e.target.value })}
+              onChange={this.handleChange}
+              name="description"
               type="text"
               className="form-control"
               id="movieDescription"
@@ -115,7 +117,7 @@ class AddMovie extends Component {
               rows="5"
               style={{
                 borderColor:
-                  this.state.description !== "" && this.state.title.length < 300
+                  info.description !== "" && info.title.length < 300
                     ? "green"
                     : "red"
               }}
@@ -125,7 +127,7 @@ class AddMovie extends Component {
             Add
           </button>
         </form>
-        {this.state.error ? (
+        {error ? (
           <p style={{ color: "red", textAlign: "center" }}>
             something went wrong, please try agin
           </p>

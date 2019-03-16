@@ -73,7 +73,11 @@ class HomePage extends Component {
                 <th scope="row">{index}</th>
                 <td>{movie.title}</td>
                 <td>{movie.director}</td>
-                <td>{movie.rating}</td>
+                <td>
+                  {Array(parseInt(movie.rating))
+                    .fill("🤩")
+                    .join("")}
+                </td>
                 <td>
                   <Link to={`${this.props.match.url}/${movie.id}`}>
                     <button type="button" className="btn btn-sm btn-success">

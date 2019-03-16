@@ -18,6 +18,7 @@ class MovieInfo extends Component {
   }
   render() {
     const { movie } = this.state;
+
     if (movie === undefined) return <div>Wait...</div>;
     return (
       <main
@@ -28,13 +29,30 @@ class MovieInfo extends Component {
         <h3 className="cover-heading"> {movie.director}</h3>
         <p className="lead">{movie.description}</p>
         <p className="lead">
-          <span className="btn btn-lg btn-secondary">{movie.rating}</span>
+          <span className="btn btn-lg btn-secondary">
+            {Array(parseInt(movie.rating))
+              .fill("🤩")
+              .join("")}
+          </span>
         </p>
-        <Link to={"/Home/edit/" + movie.id}>
-          <button type="button" className="btn btn-sm btn-info">
-            Edit
-          </button>
-        </Link>
+        <div
+          style={{
+            display: "flex",
+            width: "150px",
+            justifyContent: "space-around"
+          }}
+        >
+          <Link to={"/Home/edit/" + movie.id}>
+            <button type="button" className="btn btn-sm btn-danger">
+              Edit
+            </button>
+          </Link>
+          <Link to={"/Home"}>
+            <button type="button" className="btn btn-sm btn-info">
+              Home
+            </button>
+          </Link>
+        </div>
       </main>
     );
   }
