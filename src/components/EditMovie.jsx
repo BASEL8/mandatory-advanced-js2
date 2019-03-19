@@ -9,8 +9,11 @@ class EditMovie extends Component {
       director: "",
       description: "",
       rating: 0
-    }
+    },
+    originalInfo: {},
+    sameInfo: true
   };
+
   validate = () => {
     const errors = {};
     const { info } = this.state;
@@ -51,29 +54,34 @@ class EditMovie extends Component {
     e.preventDefault();
     const errors = this.validate();
     this.setState({ errors });
+    const { info, originalInfo } = this.state;
     if (Object.keys(errors).length > 0) return;
-    fetch(
-      "http://ec2-13-53-132-57.eu-north-1.compute.amazonaws.com:3000/movies/" +
-        this.props.match.params.id,
-      {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(this.state.info)
-      }
-    )
-      .then((response) => {
-        if (response.ok) {
-          this.props.history.push("/Home");
-        } else {
-          this.setState({ serverError: true });
+    if (!this.objectsIsEquivalent(originalInfo, info)) {
+      fetch(
+        "http://ec2-13-53-132-57.eu-north-1.compute.amazonaws.com:3000/movies/" +
+          this.props.match.params.id,
+        {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(this.state.info)
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      )
+        .then((response) => {
+          if (response.ok) {
+            this.props.history.push("/Home");
+          } else {
+            this.setState({ serverError: true });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      this.props.history.push("/Home");
+    }
   };
   componentDidMount() {
     fetch(
@@ -81,7 +89,9 @@ class EditMovie extends Component {
         this.props.match.params.id
     )
       .then((response) => response.json())
-      .then((info) => this.setState({ info }));
+      .then((info) => {
+        this.setState({ info, originalInfo: info });
+      });
   }
   handleChange = ({ currentTarget: input }) => {
     const errors = { ...this.state.errors };
@@ -92,11 +102,31 @@ class EditMovie extends Component {
       if (errors[input.name]) delete errors[input.name];
     }
     const info = { ...this.state.info };
+    const { originalInfo } = this.state;
     info[input.name] = input.value;
-    this.setState({ info, errors });
+    this.setState({
+      info,
+      errors,
+      sameInfo: this.objectsIsEquivalent(originalInfo, info)
+    });
   };
+  objectsIsEquivalent = (a, b) => {
+    let aProps = Object.getOwnPropertyNames(a);
+    let bProps = Object.getOwnPropertyNames(b);
+    if (aProps.length !== bProps.length) {
+      return false;
+    }
+    for (let i = 0; i < aProps.length; i++) {
+      let propName = aProps[i];
+      if (a[propName] !== b[propName]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   render() {
-    const { info, errors, serverError } = this.state;
+    const { info, errors, serverError, sameInfo } = this.state;
     return (
       <div className="flex-grow-1">
         <Helmet>
@@ -186,7 +216,7 @@ class EditMovie extends Component {
             </p>
           ) : null}
           <button type="submit" className="btn btn-primary">
-            Add
+            {sameInfo ? "back" : "edit"}
           </button>
         </form>
       </div>
