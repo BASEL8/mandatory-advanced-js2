@@ -32,7 +32,21 @@ class AddMovie extends Component {
       errors.description = " Must be less than 300 letters long";
     return Object.keys(errors).length === 0 ? {} : errors;
   };
-  required;
+  validateProperty = ({ name, value }) => {
+    if (name === "title") {
+      if (value.trim() === "") return "Title is required";
+      if (value.trim().length > 40) return " must be less than 40 letters long";
+    }
+    if (name === "director") {
+      if (value.trim() === "") return "Director is required";
+      if (value.trim().length > 40) return " must be less than 40 letters long";
+    }
+    if (name === "description") {
+      if (value.trim() === "") return "Description is required";
+      if (value.trim().length > 300)
+        return " must be less than 300 letters long";
+    }
+  };
   handleAddMovie = (e) => {
     e.preventDefault();
     const errors = this.validate();
@@ -64,8 +78,18 @@ class AddMovie extends Component {
   handleChange = ({ currentTarget: input }) => {
     const info = { ...this.state.info };
     info[input.name] = input.value;
+    const errors = { ...this.state.errors };
+    const errorMessage = this.validateProperty(input);
+    console.log(this.validateProperty(input));
+
+    if (errorMessage) {
+      errors[input.name] = errorMessage;
+    } else {
+      if (errors[input.name]) delete errors[input.name];
+    }
     this.setState({
-      info
+      info,
+      errors
     });
   };
   render() {
@@ -110,7 +134,7 @@ class AddMovie extends Component {
           </div>
           <div className="form-group">
             <label htmlFor="movieDRating">
-              Rating :{" "}
+              Rating :
               {Array(parseInt(info.rating))
                 .fill("🤩")
                 .join("")}

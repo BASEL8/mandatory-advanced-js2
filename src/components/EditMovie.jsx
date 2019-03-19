@@ -32,6 +32,21 @@ class EditMovie extends Component {
 
     return Object.keys(errors).length === 0 ? {} : errors;
   };
+  validateProperty = ({ name, value }) => {
+    if (name === "title") {
+      if (value.trim() === "") return "Title is required";
+      if (value.trim().length > 40) return " must be less than 40 letters long";
+    }
+    if (name === "director") {
+      if (value.trim() === "") return "Director is required";
+      if (value.trim().length > 40) return " must be less than 40 letters long";
+    }
+    if (name === "description") {
+      if (value.trim() === "") return "Description is required";
+      if (value.trim().length > 300)
+        return " must be less than 300 letters long";
+    }
+  };
   handleAddMovie = (e) => {
     e.preventDefault();
     const errors = this.validate();
@@ -69,9 +84,16 @@ class EditMovie extends Component {
       .then((info) => this.setState({ info }));
   }
   handleChange = ({ currentTarget: input }) => {
+    const errors = { ...this.state.errors };
+    const errorMessage = this.validateProperty(input);
+    if (errorMessage) {
+      errors[input.name] = errorMessage;
+    } else {
+      if (errors[input.name]) delete errors[input.name];
+    }
     const info = { ...this.state.info };
     info[input.name] = input.value;
-    this.setState({ info });
+    this.setState({ info, errors });
   };
   render() {
     const { info, errors, serverError } = this.state;
