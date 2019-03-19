@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Helmet } from "react-helmet";
-
+import Joi from "joi-browser";
 class AddMovie extends Component {
   state = {
     errors: {},
@@ -12,47 +12,48 @@ class AddMovie extends Component {
       rating: 1
     }
   };
+  schema = {
+    title: Joi.string()
+      .max(40)
+      .min(1)
+      .required()
+      .label("Title"),
+    director: Joi.string()
+      .max(40)
+      .min(1)
+      .required()
+      .label("Director"),
+    description: Joi.string()
+      .max(300)
+      .min(1)
+      .required()
+      .label("Description"),
+    rating: Joi.number()
+      .integer()
+      .max(5)
+      .required()
+      .label("Rating")
+  };
   validate = () => {
-    const errors = {};
-    const { info } = this.state;
-    if (info.title.trim() === "") errors.title = "Title is required";
-    if (info.title.trim().length > 40)
-      errors.title = " must be less than 40 letters long";
-    //director
-    if (info.director.trim() === "") errors.director = "Director is required";
-    if (info.director.trim().length > 40)
-      errors.director = " Must be less than 40 letters long";
-    //rating
-    if (info.rating === undefined) errors.rating = "You need to rate the movie";
-
-    //description
-    if (info.description.trim() === "")
-      errors.description = "Description is required";
-    if (info.description.trim().length > 300)
-      errors.description = " Must be less than 300 letters long";
-    return Object.keys(errors).length === 0 ? {} : errors;
+    const joiOptions = { abortEarly: false };
+    const { error } = Joi.validate(this.state.info, this.schema, joiOptions);
+    if (!error) return null;
+    return error.details.reduce((errors, error) => {
+      errors[error.path] = error.message;
+      return errors;
+    }, {});
   };
   validateProperty = ({ name, value }) => {
-    if (name === "title") {
-      if (value.trim() === "") return "Title is required";
-      if (value.trim().length > 40) return " must be less than 40 letters long";
-    }
-    if (name === "director") {
-      if (value.trim() === "") return "Director is required";
-      if (value.trim().length > 40) return " must be less than 40 letters long";
-    }
-    if (name === "description") {
-      if (value.trim() === "") return "Description is required";
-      if (value.trim().length > 300)
-        return " must be less than 300 letters long";
-    }
+    const obj = { [name]: value };
+    const schema = { [name]: this.schema[name] };
+    const { error } = Joi.validate(obj, schema);
+    return error ? error.details[0].message : null;
   };
   handleAddMovie = (e) => {
     e.preventDefault();
     const errors = this.validate();
     this.setState({ errors });
-    console.log(errors);
-    if (Object.keys(errors).length > 0) return;
+    if (errors) return;
     fetch(
       "http://ec2-13-53-132-57.eu-north-1.compute.amazonaws.com:3000/movies",
       {
@@ -80,8 +81,6 @@ class AddMovie extends Component {
     info[input.name] = input.value;
     const errors = { ...this.state.errors };
     const errorMessage = this.validateProperty(input);
-    console.log(this.validateProperty(input));
-
     if (errorMessage) {
       errors[input.name] = errorMessage;
     } else {
@@ -110,7 +109,7 @@ class AddMovie extends Component {
               placeholder="title"
               name="title"
             />
-            {errors.title ? (
+            {errors && errors.title ? (
               <small id="movieTitle" className="form-text text-danger">
                 {errors.title}
               </small>
@@ -126,7 +125,7 @@ class AddMovie extends Component {
               id="movieDirector"
               placeholder="Director"
             />
-            {errors.director ? (
+            {errors && errors.director ? (
               <small id="movieTitle" className="form-text text-danger">
                 {errors.director}
               </small>
@@ -150,7 +149,7 @@ class AddMovie extends Component {
               placeholder="Rating"
               value={info.rating}
             />
-            {errors.rating ? (
+            {errors && errors.rating ? (
               <small id="movieTitle" className="form-text text-danger">
                 {errors.rating}
               </small>
@@ -167,7 +166,7 @@ class AddMovie extends Component {
               placeholder="Description"
               rows="5"
             />
-            {errors.description ? (
+            {errors && errors.description ? (
               <small id="movieTitle" className="form-text text-danger">
                 {errors.description}
               </small>

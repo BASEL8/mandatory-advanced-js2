@@ -16,7 +16,13 @@ class App extends Component {
           <Switch>
             <Route path="/Home/edit/:id" exact component={EditMovie} />
             <Route path="/Home/:id" exact component={MovieInfo} />
-            <Route path="/Home" exact component={HomePage} />
+            <Route
+              path="/Home"
+              exact
+              component={(props) => (
+                <HomePage setInfo={this.setInfo} {...props} />
+              )}
+            />
             <Route path="/addMovie" exact component={AddMovie} />
             <Route path="/not-found" render={() => <h3>Not Found</h3>} />
             <Redirect from="/" to="/home" />
