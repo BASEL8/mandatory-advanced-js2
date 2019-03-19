@@ -16,19 +16,19 @@ class EditMovie extends Component {
     const { info } = this.state;
     if (info.title.trim() === "") errors.title = "Title is required";
     if (info.title.trim().length > 40)
-      errors.title = " must be less than 40 letters long";
+      errors.title = " Must be less than 40 letters long";
     //director
     if (info.director.trim() === "") errors.director = "Director is required";
     if (info.director.trim().length > 40)
-      errors.director = " must be less than 40 letters long";
+      errors.director = " Must be less than 40 letters long";
     //rating
-    if (info.rating === undefined) errors.rating = "you need to rate the movie";
+    if (info.rating === undefined) errors.rating = "You need to rate the movie";
 
     //description
     if (info.description.trim() === "")
-      errors.description = "description is required";
+      errors.description = "Description is required";
     if (info.description.trim().length > 300)
-      errors.description = " must be less than 300 letters long";
+      errors.description = " Must be less than 300 letters long";
 
     return Object.keys(errors).length === 0 ? {} : errors;
   };
@@ -132,7 +132,6 @@ class EditMovie extends Component {
               max="5"
               className="form-control"
               id="movieRatingEdit"
-              value={info.rating}
             />
             {errors.rating ? (
               <small id="movieTitle" className="form-text text-danger">
