@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { Helmet } from "react-helmet";
 class EditMovie extends Component {
   state = {
-    error: false,
+    errors: {},
+    serverError: false,
     info: {
       title: "",
       director: "",
@@ -10,8 +11,32 @@ class EditMovie extends Component {
       rating: 0
     }
   };
+  validate = () => {
+    const errors = {};
+    const { info } = this.state;
+    if (info.title.trim() === "") errors.title = "Title is required";
+    if (info.title.trim().length > 40)
+      errors.title = " must be less than 40 letters long";
+    //director
+    if (info.director.trim() === "") errors.director = "Director is required";
+    if (info.director.trim().length > 40)
+      errors.director = " must be less than 40 letters long";
+    //rating
+    if (info.rating === undefined) errors.rating = "you need to rate the movie";
+
+    //description
+    if (info.description.trim() === "")
+      errors.description = "description is required";
+    if (info.description.trim().length > 300)
+      errors.description = " must be less than 300 letters long";
+
+    return Object.keys(errors).length === 0 ? {} : errors;
+  };
   handleAddMovie = (e) => {
     e.preventDefault();
+    const errors = this.validate();
+    this.setState({ errors });
+    if (Object.keys(errors).length > 0) return;
     fetch(
       "http://ec2-13-53-132-57.eu-north-1.compute.amazonaws.com:3000/movies/" +
         this.props.match.params.id,
@@ -28,9 +53,7 @@ class EditMovie extends Component {
         if (response.ok) {
           this.props.history.push("/Home");
         } else {
-          this.setState({
-            error: true
-          });
+          this.setState({ serverError: true });
         }
       })
       .catch((error) => {
@@ -51,7 +74,7 @@ class EditMovie extends Component {
     this.setState({ info });
   };
   render() {
-    const { info, error } = this.state;
+    const { info, errors, serverError } = this.state;
     return (
       <div className="flex-grow-1">
         <Helmet>
@@ -69,11 +92,12 @@ class EditMovie extends Component {
               className="form-control"
               id="movieTitleEdit"
               placeholder="title"
-              style={{
-                borderColor:
-                  info.title !== "" && info.title.length < 40 ? "green" : "red"
-              }}
             />
+            {errors.title ? (
+              <small id="movieTitle" className="form-text text-danger">
+                {errors.title}
+              </small>
+            ) : null}
           </div>
           <div className="form-group">
             <label htmlFor="movieDirectorEdit">New Director</label>
@@ -85,22 +109,19 @@ class EditMovie extends Component {
               className="form-control"
               id="movieDirectorEdit"
               placeholder="Director"
-              style={{
-                borderColor:
-                  info.director !== "" && info.director.length <= 40
-                    ? "green"
-                    : "red"
-              }}
             />
+            {errors.director ? (
+              <small id="movieTitle" className="form-text text-danger">
+                {errors.director}
+              </small>
+            ) : null}
           </div>
           <div className="form-group">
-            <label
-              htmlFor="movieRatingEdit"
-              style={{
-                color: info.rating >= 0 && info.rating <= 5 ? "green" : "red"
-              }}
-            >
-              New Rating
+            <label htmlFor="movieRatingEdit">
+              New Rating :{" "}
+              {Array(parseInt(info.rating))
+                .fill("🤩")
+                .join("")}
             </label>
             <input
               onChange={this.handleChange}
@@ -111,8 +132,13 @@ class EditMovie extends Component {
               max="5"
               className="form-control"
               id="movieRatingEdit"
-              placeholder="Rating"
+              value={info.rating}
             />
+            {errors.rating ? (
+              <small id="movieTitle" className="form-text text-danger">
+                {errors.rating}
+              </small>
+            ) : null}
           </div>
           <div className="form-group">
             <label htmlFor="movieDescriptionEdit">New Description</label>
@@ -125,25 +151,23 @@ class EditMovie extends Component {
               className="form-control"
               id="movieDescriptionEdit"
               placeholder="Description"
-              style={{
-                borderColor:
-                  info.description !== "" && info.title.length < 300
-                    ? "green"
-                    : "red"
-              }}
             />
+            {errors.description ? (
+              <small id="movieTitle" className="form-text text-danger">
+                {errors.description}
+              </small>
+            ) : null}
           </div>
+          {serverError ? (
+            <p>
+              please try again there is a problem with the server and we will
+              fix it as soon as possible{" "}
+            </p>
+          ) : null}
           <button type="submit" className="btn btn-primary">
             Add
           </button>
         </form>
-        {error ? (
-          <p style={{ color: "red", textAlign: "center" }}>
-            something went wrong, please try agin
-          </p>
-        ) : (
-          <p />
-        )}
       </div>
     );
   }
