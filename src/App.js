@@ -10,7 +10,7 @@ import NavBar from "./components/Nav";
 class App extends Component {
   render() {
     return (
-      <div className="h-100">
+      <div>
         <NavBar />
         <div className="container d-flex justify-content-center align-items-center h-100">
           <Switch>
